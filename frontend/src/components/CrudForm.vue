@@ -1,35 +1,71 @@
 <template>
-  <div>
-    <h2>Cadastro</h2>
+  <div class="border p-4 rounded bg-gray-50">
+    <h2 class="text-lg font-bold mb-4">
+      {{ formData.id ? 'Editar Registro' : 'Novo Registro' }}
+    </h2>
+
     <form @submit.prevent="save">
-      <div v-for="field in fields" :key="field.name" style="margin-bottom: 10px;">
-        <label>{{ field.label }}</label><br />
+      <div v-for="field in fields" :key="field.name" class="mb-4">
+        <label class="block mb-1 font-medium">{{ field.label }}</label>
         <input
-          v-model="form[field.name]"
-          :type="field.type || 'text'"
+          v-if="field.type === 'text' || field.type === 'number'"
+          :type="field.type"
+          v-model="formData[field.name]"
           :placeholder="field.placeholder || ''"
+          class="border p-2 w-full rounded"
         />
+
+        <textarea
+          v-else-if="field.type === 'textarea'"
+          v-model="formData[field.name]"
+          :placeholder="field.placeholder || ''"
+          class="border p-2 w-full rounded"
+        ></textarea>
       </div>
-      <button type="submit">Salvar</button>
+
+      <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">
+        {{ formData.id ? 'Atualizar' : 'Salvar' }}
+      </button>
+
+      <button v-if="formData.id" type="button" @click="reset" class="ml-2 bg-gray-400 text-white px-4 py-2 rounded">
+        Cancelar
+      </button>
     </form>
   </div>
 </template>
 
-<script setup>
-import { reactive } from 'vue'
-import api from '../services/api'
+<script>
+import axios from "axios";
 
-const props = defineProps({
-  fields: Array, // [{ name, label, type }]
-  endpoint: String,
-  onSaved: Function
-})
+export default {
+  name: "CrudForm",
+  props: {
+    fields: { type: Array, required: true },
+    endpoint: { type: String, required: true }
+  },
+  data() {
+    return {
+      formData: {}
+    };
+  },
+  methods: {
+    save() {
+      const method = this.formData.id ? "put" : "post";
+      const url = this.formData.id
+        ? `${this.endpoint}/${this.formData.id}`
+        : this.endpoint;
 
-const form = reactive({})
-
-const save = async () => {
-  await api.post(props.endpoint, form)
-  if (props.onSaved) props.onSaved()
-  Object.keys(form).forEach(k => form[k] = '') // limpar campos
-}
+      axios[method](url, this.formData).then(() => {
+        this.$emit("saved");
+        this.reset();
+      });
+    },
+    edit(record) {
+      this.formData = { ...record };
+    },
+    reset() {
+      this.formData = {};
+    }
+  }
+};
 </script>

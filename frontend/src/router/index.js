@@ -1,9 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import UsersPage from '../pages/UsersPage.vue'
+import Users from '../pages/Users.vue'
 
 const routes = [
   { path: '/', redirect: '/users' },
-  { path: '/users', component: UsersPage, name: 'users' }
+  { path: '/users', component: Users, name: 'users' }
 ]
 
 const router = createRouter({
