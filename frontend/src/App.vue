@@ -3,5 +3,5 @@
 </template>
 
 <script setup>
-import Users from './pages/Users.vue'
+import UsersPage from './pages/UsersPage.vue'
 </script>
